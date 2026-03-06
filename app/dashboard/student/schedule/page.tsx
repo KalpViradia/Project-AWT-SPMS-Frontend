@@ -5,6 +5,8 @@ import { RedirectType, redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Calendar as CalendarIcon, MapPin, Clock, BarChart3, CheckCircle, XCircle } from "lucide-react"
 import { format } from "date-fns"
+import { CalendarView } from "@/components/shared/calendar-view"
+import { getMilestones } from "@/lib/milestone-actions"
 
 export default async function SchedulePage() {
     const session = await auth()
@@ -38,7 +40,7 @@ export default async function SchedulePage() {
         return (
             <div className="flex flex-col gap-6">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight">Schedule</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Schedule & Calendar</h1>
                     <p className="text-muted-foreground">View your upcoming project meetings and reviews.</p>
                 </div>
                 <Card>
@@ -52,26 +54,51 @@ export default async function SchedulePage() {
         )
     }
 
-    // Fetch upcoming meetings
+    // Fetch meetings
     const meetings = await prisma.project_meeting.findMany({
-        where: {
-            project_group_id: group.project_group_id,
-            // Removed date filter to show past meetings for attendance history
-        },
-        orderBy: {
-            meeting_datetime: 'desc' // Show newest first
-        },
+        where: { project_group_id: group.project_group_id },
+        orderBy: { meeting_datetime: 'desc' },
         include: {
             staff: true,
             project_meeting_attendance: {
-                where: {
-                    student_id: studentId
-                }
+                where: { student_id: studentId }
             }
         }
     })
 
-    // ── Attendance Analytics ──
+    // Fetch milestones for calendar
+    const milestones = await getMilestones(group.project_group_id)
+
+    // Build calendar events
+    type CalendarEvent = { id: string; date: Date; title: string; type: "meeting" | "milestone" | "report"; meta?: string }
+    const calendarEvents: CalendarEvent[] = []
+
+    for (const m of meetings) {
+        calendarEvents.push({
+            id: `meeting-${m.project_meeting_id}`,
+            date: new Date(m.meeting_datetime),
+            title: m.meeting_purpose || "Meeting",
+            type: "meeting",
+            meta: m.staff.staff_name,
+        })
+    }
+
+    for (const ms of milestones) {
+        calendarEvents.push({
+            id: `ms-start-${ms.milestone_id}`,
+            date: new Date(ms.start_date),
+            title: `▸ ${ms.title}`,
+            type: "milestone",
+        })
+        calendarEvents.push({
+            id: `ms-end-${ms.milestone_id}`,
+            date: new Date(ms.end_date),
+            title: `◂ ${ms.title}`,
+            type: "milestone",
+        })
+    }
+
+    // Attendance Analytics
     const completedMeetings = meetings.filter(
         (m) => m.project_meeting_attendance.length > 0
     )
@@ -86,9 +113,20 @@ export default async function SchedulePage() {
     return (
         <div className="flex flex-col gap-6">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Schedule</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Schedule & Calendar</h1>
                 <p className="text-muted-foreground">Upcoming meetings and reviews for {group.project_group_name}.</p>
             </div>
+
+            {/* ── Calendar View ── */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>Calendar</CardTitle>
+                    <CardDescription>Meetings, milestones, and deadlines at a glance.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <CalendarView events={calendarEvents} />
+                </CardContent>
+            </Card>
 
             {/* ── Attendance Analytics ── */}
             <div className="grid gap-4 sm:grid-cols-3">

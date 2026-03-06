@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { getFacultyGroups } from "@/lib/discussion-actions"
-import { DiscussionPanel } from "@/components/discussion-panel"
+import { ChatPanel } from "@/components/shared/chat-panel"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
 import { MessageSquare } from "lucide-react"
@@ -27,11 +27,11 @@ export default function FacultyDiscussionPage() {
     const userId = parseInt((session?.user as any)?.id || "0")
 
     return (
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Discussion</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Announcements</h1>
                 <p className="text-muted-foreground">
-                    Chat with your guided project groups.
+                    Post announcements to your guided project groups.
                 </p>
             </div>
 
@@ -51,17 +51,21 @@ export default function FacultyDiscussionPage() {
             </div>
 
             {selectedGroup ? (
-                <DiscussionPanel
+                <ChatPanel
+                    key={selectedGroup.project_group_id}
                     projectGroupId={selectedGroup.project_group_id}
                     groupName={selectedGroup.project_group_name}
                     currentUserId={userId}
                     currentUserRole="faculty"
+                    channel="announcement"
+                    canSend={true}
+                    canReply={true}
                 />
             ) : (
                 <Card>
                     <CardContent className="py-8 text-center text-muted-foreground">
                         <MessageSquare className="mx-auto mb-4 h-12 w-12 opacity-40" />
-                        <p>{groups.length === 0 ? "You are not a guide for any groups." : "Select a group to start a discussion."}</p>
+                        <p>{groups.length === 0 ? "You are not a guide for any groups." : "Select a group to manage announcements."}</p>
                     </CardContent>
                 </Card>
             )}

@@ -15,6 +15,9 @@ import { Calendar, FileText, Users, ArrowLeft, Mail, Phone } from "lucide-react"
 import Link from "next/link"
 import { format } from "date-fns"
 import { DocumentsList } from "@/components/shared/documents-list"
+import { GanttChart } from "@/components/shared/gantt-chart"
+import { getMilestones } from "@/lib/milestone-actions"
+import { getTaskCounts } from "@/lib/task-actions"
 
 export default async function GroupDetailsPage({ params }: { params: Promise<{ groupId: string }> }) {
     const session = await auth()
@@ -69,6 +72,12 @@ export default async function GroupDetailsPage({ params }: { params: Promise<{ g
             project_meeting_attendance: true,
         },
     })
+
+    // Fetch milestones for progress chart
+    const milestones = await getMilestones(id)
+
+    // Fetch task counts for kanban summary
+    const taskCounts = await getTaskCounts(id)
 
     return (
         <div className="space-y-6">
@@ -138,6 +147,43 @@ export default async function GroupDetailsPage({ params }: { params: Promise<{ g
                             </CardContent>
                         </Card>
                     )}
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Project Progress</CardTitle>
+                            <CardDescription>Milestone progress tracked by the team.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <GanttChart
+                                milestones={milestones}
+                                projectGroupId={id}
+                                editable={false}
+                            />
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Task Board Summary</CardTitle>
+                            <CardDescription>Current task distribution across columns.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="grid grid-cols-4 gap-3">
+                                {[
+                                    { key: 'todo', label: 'To Do', color: 'bg-slate-500' },
+                                    { key: 'in_progress', label: 'In Progress', color: 'bg-blue-500' },
+                                    { key: 'review', label: 'Review', color: 'bg-amber-500' },
+                                    { key: 'done', label: 'Done', color: 'bg-emerald-500' },
+                                ].map((col) => (
+                                    <div key={col.key} className="text-center p-3 rounded-lg bg-muted/30">
+                                        <div className={`w-2 h-2 rounded-full ${col.color} mx-auto mb-1.5`} />
+                                        <p className="text-xl font-bold">{taskCounts[col.key] || 0}</p>
+                                        <p className="text-[10px] text-muted-foreground">{col.label}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </CardContent>
+                    </Card>
 
                     <Card>
                         <CardHeader>

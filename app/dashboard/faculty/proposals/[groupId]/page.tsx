@@ -15,6 +15,7 @@ import Link from "next/link"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
 import { ApprovalForm } from "@/components/faculty/approval-form"
+import { FeedbackDisplay } from "@/components/shared/feedback-display"
 
 export default async function ProposalReviewPage({ params }: { params: Promise<{ groupId: string }> }) {
     const session = await auth()
@@ -45,7 +46,10 @@ export default async function ProposalReviewPage({ params }: { params: Promise<{
                 include: {
                     student: true
                 }
-            }
+            },
+            proposal_feedback: {
+                include: { staff: { select: { staff_name: true } } },
+            },
         }
     })
 
@@ -201,6 +205,10 @@ export default async function ProposalReviewPage({ params }: { params: Promise<{
                                 <p className="text-sm">{group.rejection_reason}</p>
                             </CardContent>
                         </Card>
+                    )}
+
+                    {group.proposal_feedback?.[0] && (
+                        <FeedbackDisplay feedback={group.proposal_feedback[0]} />
                     )}
                 </div>
 

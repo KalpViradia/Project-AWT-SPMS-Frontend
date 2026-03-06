@@ -1,8 +1,7 @@
 "use client"
 
-import { createContext, useContext, useEffect, useRef } from "react"
-import { getSocket } from "@/lib/socket-client"
-import type { Socket } from "socket.io-client"
+import { createContext, useContext, useEffect, useState } from "react"
+import { io, Socket } from "socket.io-client"
 
 const SocketContext = createContext<Socket | null>(null)
 
@@ -17,22 +16,28 @@ interface SocketProviderProps {
 }
 
 export function SocketProvider({ userId, userRole, children }: SocketProviderProps) {
-    const socketRef = useRef<Socket | null>(null)
+    const [socket, setSocket] = useState<Socket | null>(null)
 
     useEffect(() => {
-        const socket = getSocket()
-        socketRef.current = socket
+        const s = io({
+            path: "/api/socketio",
+            transports: ["websocket", "polling"],
+        })
 
-        // Join user notification room
-        socket.emit("join:user", { userId, userRole })
+        s.on("connect", () => {
+            console.log("[Socket.IO] Connected:", s.id)
+            s.emit("join:user", { userId, userRole })
+        })
+
+        setSocket(s)
 
         return () => {
-            socket.disconnect()
+            s.disconnect()
         }
     }, [userId, userRole])
 
     return (
-        <SocketContext.Provider value={socketRef.current ?? getSocket()}>
+        <SocketContext.Provider value={socket}>
             {children}
         </SocketContext.Provider>
     )

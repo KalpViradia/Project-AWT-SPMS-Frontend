@@ -245,6 +245,46 @@ export async function approveGroup(formData: FormData) {
       }
     });
     console.log('[approveGroup] Successfully updated group status');
+
+    // Save structured proposal feedback if provided
+    const feedbackRaw = formData.get('proposalFeedback') as string | null;
+    if (feedbackRaw) {
+      try {
+        const feedback = JSON.parse(feedbackRaw);
+        const { ratings, overallComments, sectionComments } = feedback;
+
+        await prisma.proposal_feedback.upsert({
+          where: {
+            project_group_id_reviewer_id: {
+              project_group_id: groupId,
+              reviewer_id: staffId,
+            },
+          },
+          update: {
+            problem_clarity: ratings?.problemClarity || 0,
+            methodology: ratings?.methodology || 0,
+            feasibility: ratings?.feasibility || 0,
+            innovation: ratings?.innovation || 0,
+            overall_comments: overallComments || null,
+            section_comments: sectionComments ? JSON.stringify(sectionComments) : null,
+          },
+          create: {
+            project_group_id: groupId,
+            reviewer_id: staffId,
+            problem_clarity: ratings?.problemClarity || 0,
+            methodology: ratings?.methodology || 0,
+            feasibility: ratings?.feasibility || 0,
+            innovation: ratings?.innovation || 0,
+            overall_comments: overallComments || null,
+            section_comments: sectionComments ? JSON.stringify(sectionComments) : null,
+          },
+        });
+        console.log('[approveGroup] Saved structured feedback');
+      } catch (e) {
+        console.error('[approveGroup] Failed to save feedback:', e);
+        // Don't fail the main action
+      }
+    }
   } catch (error) {
     console.error("[approveGroup] Failed to update group status:", error);
     throw error instanceof Error ? error : new Error(String(error));

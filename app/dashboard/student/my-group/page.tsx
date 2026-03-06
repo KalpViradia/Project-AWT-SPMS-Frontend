@@ -14,6 +14,7 @@ import { UploadDocumentDialog } from "@/components/student/upload-document-dialo
 import { DocumentsList } from "@/components/shared/documents-list"
 import { ProposalForm } from "@/components/student/proposal-form"
 import { ProposalStatusBadge } from "@/components/student/proposal-status-badge"
+import { FeedbackDisplay } from "@/components/shared/feedback-display"
 import Link from "next/link"
 
 export default async function MyGroupPage() {
@@ -48,7 +49,10 @@ export default async function MyGroupPage() {
                     },
                     project_document: {
                         orderBy: { uploaded_at: 'desc' }
-                    }
+                    },
+                    proposal_feedback: {
+                        include: { staff: { select: { staff_name: true } } },
+                    },
                 }
             }
         }
@@ -140,6 +144,10 @@ export default async function MyGroupPage() {
                         </Alert>
                     )
                 }
+
+                {group.proposal_feedback?.[0] && (
+                    <FeedbackDisplay feedback={group.proposal_feedback[0]} />
+                )}
 
                 <div className="grid gap-6 md:grid-cols-2">
                     <Card>

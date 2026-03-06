@@ -5,6 +5,7 @@ import { auth } from "@/auth"
 import { SidebarProvider } from "@/components/sidebar-provider"
 import { DashboardLayoutClient } from "@/components/dashboard-layout-client"
 import { SocketProvider } from "@/components/socket-provider"
+import { SessionProvider } from "@/components/session-provider"
 
 export default async function DashboardLayout({
     children,
@@ -22,28 +23,30 @@ export default async function DashboardLayout({
     }
 
     return (
-        <SidebarProvider>
-            <SocketProvider userId={userId} userRole={role || "student"}>
-                <DashboardLayoutClient role={role}>
-                    {/* Header */}
-                    <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-6">
-                        <div className="flex flex-1 items-center gap-4">
-                            {/* Mobile Sidebar Trigger could go here in future */}
-                            <h2 className="text-lg font-semibold">{getDashboardTitle(role)}</h2>
-                        </div>
-                        <div className="ml-auto flex items-center gap-4">
-                            <NotificationBell />
-                            <ModeToggle />
-                            <UserNav />
-                        </div>
-                    </header>
+        <SessionProvider session={session}>
+            <SidebarProvider>
+                <SocketProvider userId={userId} userRole={role || "student"}>
+                    <DashboardLayoutClient role={role}>
+                        {/* Header */}
+                        <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-6">
+                            <div className="flex flex-1 items-center gap-4">
+                                {/* Mobile Sidebar Trigger could go here in future */}
+                                <h2 className="text-lg font-semibold">{getDashboardTitle(role)}</h2>
+                            </div>
+                            <div className="ml-auto flex items-center gap-4">
+                                <NotificationBell />
+                                <ModeToggle />
+                                <UserNav />
+                            </div>
+                        </header>
 
-                    {/* Page Content */}
-                    <main className="flex-1 p-6 overflow-auto">
-                        {children}
-                    </main>
-                </DashboardLayoutClient>
-            </SocketProvider>
-        </SidebarProvider>
+                        {/* Page Content */}
+                        <main className="flex-1 p-6 overflow-auto">
+                            {children}
+                        </main>
+                    </DashboardLayoutClient>
+                </SocketProvider>
+            </SidebarProvider>
+        </SessionProvider>
     )
 }

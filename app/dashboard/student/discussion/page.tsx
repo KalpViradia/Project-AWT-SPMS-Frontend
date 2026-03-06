@@ -1,9 +1,9 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { getStudentGroupId } from "@/lib/discussion-actions"
-import { DiscussionPanel } from "@/components/discussion-panel"
 import { Card, CardContent } from "@/components/ui/card"
 import { MessageSquare } from "lucide-react"
+import { StudentDiscussionClient } from "./client"
 
 export default async function StudentDiscussionPage() {
     const session = await auth()
@@ -29,19 +29,10 @@ export default async function StudentDiscussionPage() {
     }
 
     return (
-        <div className="flex flex-col gap-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Discussion</h1>
-                <p className="text-muted-foreground">
-                    Chat with your group members and guide.
-                </p>
-            </div>
-            <DiscussionPanel
-                projectGroupId={groupInfo.groupId}
-                groupName={groupInfo.groupName}
-                currentUserId={studentId}
-                currentUserRole="student"
-            />
-        </div>
+        <StudentDiscussionClient
+            groupId={groupInfo.groupId}
+            groupName={groupInfo.groupName}
+            studentId={studentId}
+        />
     )
 }

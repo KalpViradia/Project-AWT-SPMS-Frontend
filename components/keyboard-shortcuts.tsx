@@ -44,23 +44,30 @@ export function KeyboardShortcutsProvider({ role, children }: KeyboardShortcutsP
                 { href: "/dashboard/faculty/reviews", label: "Reviews" },
                 { href: "/dashboard/faculty/find-students", label: "Find Students" },
                 { href: "/dashboard/faculty/schedule", label: "Schedule" },
+                { href: "/dashboard/faculty/discussion", label: "Announcements" },
                 { href: "/dashboard/faculty/settings", label: "Settings" },
             ]
             : actualRole === "admin"
                 ? [
                     { href: "/dashboard/admin", label: "Overview" },
                     { href: "/dashboard/admin/users", label: "User Management" },
+                    { href: "/dashboard/admin/all-groups", label: "All Groups" },
                     { href: "/dashboard/admin/project-types", label: "Project Types" },
                     { href: "/dashboard/admin/academic-years", label: "Academic Years" },
                     { href: "/dashboard/admin/departments", label: "Departments" },
+                    { href: "/dashboard/admin/schedules", label: "All Meetings" },
                     { href: "/dashboard/admin/reports", label: "Reports" },
+                    { href: "/dashboard/admin/settings", label: "Settings" },
                 ]
                 : [
                     { href: "/dashboard/student", label: "Overview" },
                     { href: "/dashboard/student/my-group", label: "My Group" },
                     { href: "/dashboard/student/project-details", label: "Project Details" },
-                    { href: "/dashboard/student/schedule", label: "Schedule" },
+                    { href: "/dashboard/student/schedule", label: "Schedule & Calendar" },
                     { href: "/dashboard/student/reports", label: "Reports" },
+                    { href: "/dashboard/student/tasks", label: "Tasks" },
+                    { href: "/dashboard/student/timeline", label: "Timeline & Progress" },
+                    { href: "/dashboard/student/discussion", label: "Discussion" },
                     { href: "/dashboard/student/settings", label: "Settings" },
                 ]
 

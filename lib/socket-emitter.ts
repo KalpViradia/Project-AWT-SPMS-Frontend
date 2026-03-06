@@ -27,13 +27,7 @@ export function emitNotification(
  */
 export function emitDiscussionMessage(
     groupId: number,
-    message: {
-        message_id: number
-        sender_id: number
-        sender_role: string
-        content: string
-        created_at: Date
-    }
+    message: Record<string, unknown>
 ) {
     const io = getIO()
     if (!io) return

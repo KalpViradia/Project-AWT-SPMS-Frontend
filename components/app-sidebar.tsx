@@ -20,6 +20,7 @@ import {
     CalendarDays,
     Clock,
     MessageSquare,
+    ListTodo,
 } from "lucide-react"
 
 interface AppSidebarProps {
@@ -36,9 +37,10 @@ export function AppSidebar({ role = 'student' }: AppSidebarProps) {
         { href: "/dashboard/student", label: "Overview", icon: LayoutDashboard },
         { href: "/dashboard/student/my-group", label: "My Group", icon: Users },
         { href: "/dashboard/student/project-details", label: "Project Details", icon: BookOpen },
-        { href: "/dashboard/student/schedule", label: "Schedule", icon: Calendar },
+        { href: "/dashboard/student/schedule", label: "Schedule & Calendar", icon: Calendar },
         { href: "/dashboard/student/reports", label: "Reports", icon: FileText },
-        { href: "/dashboard/student/timeline", label: "Timeline", icon: Clock },
+        { href: "/dashboard/student/tasks", label: "Tasks", icon: ListTodo },
+        { href: "/dashboard/student/timeline", label: "Timeline & Progress", icon: Clock },
         { href: "/dashboard/student/discussion", label: "Discussion", icon: MessageSquare },
         { href: "/dashboard/student/settings", label: "Settings", icon: Settings },
     ]
@@ -49,7 +51,7 @@ export function AppSidebar({ role = 'student' }: AppSidebarProps) {
         { href: "/dashboard/faculty/reviews", label: "Reviews", icon: BookOpen },
         { href: "/dashboard/faculty/find-students", label: "Find Students", icon: Search },
         { href: "/dashboard/faculty/schedule", label: "Schedule", icon: Calendar },
-        { href: "/dashboard/faculty/discussion", label: "Discussion", icon: MessageSquare },
+        { href: "/dashboard/faculty/discussion", label: "Announcements", icon: MessageSquare },
         { href: "/dashboard/faculty/settings", label: "Settings", icon: Settings },
     ]
 

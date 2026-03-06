@@ -48,6 +48,9 @@ model project_group {
   project_invitation                           project_invitation[]
   project_document                             project_document[]
   discussion_message                           discussion_message[]
+  project_milestone                            project_milestone[]
+  project_task                                 project_task[]
+  proposal_feedback                            proposal_feedback[]
 }
 
 model project_document {
@@ -133,6 +136,7 @@ model staff {
   project_group_project_group_guide_staff_idTostaff    project_group[]   @relation("project_group_guide_staff_idTostaff")
   project_group_project_group_reviewed_byTostaff       project_group[]   @relation("project_group_reviewed_byTostaff")
   project_meeting                                      project_meeting[]
+  proposal_feedback                                    proposal_feedback[]
 }
 
 model student {
@@ -148,6 +152,7 @@ model student {
   modified_at                DateTime                     @default(now()) @db.Timestamp(6)
   project_group_member       project_group_member[]
   project_meeting_attendance project_meeting_attendance[]
+  project_task               project_task[]
 }
 
 model weekly_report {
@@ -218,11 +223,78 @@ model password_reset {
 }
 
 model discussion_message {
-  message_id       Int           @id @default(autoincrement())
+  message_id       Int                @id @default(autoincrement())
   project_group_id Int
   sender_id        Int
-  sender_role      String        @db.VarChar(20)
+  sender_role      String             @db.VarChar(20)
+  sender_name      String?            @db.VarChar(150)
   content          String
+  channel          String             @default("discussion") @db.VarChar(20) // "discussion" or "announcement"
+  reply_to_id      Int?
+  attachment_url   String?            @db.VarChar(512)
+  attachment_type  String?            @db.VarChar(20) // "image" or "file"
+  created_at       DateTime           @default(now()) @db.Timestamp(6)
+  project_group    project_group      @relation(fields: [project_group_id], references: [project_group_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_discussion_group")
+  reply_to         discussion_message?  @relation("message_replies", fields: [reply_to_id], references: [message_id], onDelete: SetNull, onUpdate: NoAction, map: "fk_reply_to")
+  replies          discussion_message[] @relation("message_replies")
+  reactions        message_reaction[]
+}
+
+model message_reaction {
+  reaction_id  Int                @id @default(autoincrement())
+  message_id   Int
+  user_id      Int
+  user_role    String             @db.VarChar(20)
+  emoji        String             @db.VarChar(10)
+  created_at   DateTime           @default(now()) @db.Timestamp(6)
+  message      discussion_message @relation(fields: [message_id], references: [message_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_reaction_message")
+
+  @@unique([message_id, user_id, emoji])
+}
+
+model project_milestone {
+  milestone_id     Int           @id @default(autoincrement())
+  project_group_id Int
+  title            String        @db.VarChar(200)
+  start_date       DateTime      @db.Date
+  end_date         DateTime      @db.Date
+  progress         Int           @default(0)
+  color            String?       @db.VarChar(7)
+  sort_order       Int           @default(0)
   created_at       DateTime      @default(now()) @db.Timestamp(6)
-  project_group    project_group @relation(fields: [project_group_id], references: [project_group_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_discussion_group")
+  modified_at      DateTime      @default(now()) @db.Timestamp(6)
+  project_group    project_group @relation(fields: [project_group_id], references: [project_group_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_milestone_group")
+}
+
+model project_task {
+  task_id          Int           @id @default(autoincrement())
+  project_group_id Int
+  title            String        @db.VarChar(200)
+  description      String?
+  status           String        @default("todo") @db.VarChar(30)
+  priority         String        @default("medium") @db.VarChar(20)
+  assigned_to      Int?
+  due_date         DateTime?     @db.Date
+  sort_order       Int           @default(0)
+  created_at       DateTime      @default(now()) @db.Timestamp(6)
+  modified_at      DateTime      @default(now()) @db.Timestamp(6)
+  project_group    project_group @relation(fields: [project_group_id], references: [project_group_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_task_group")
+  student          student?      @relation(fields: [assigned_to], references: [student_id], onDelete: SetNull, onUpdate: NoAction, map: "fk_task_student")
+}
+
+model proposal_feedback {
+  feedback_id       Int           @id @default(autoincrement())
+  project_group_id  Int
+  reviewer_id       Int
+  problem_clarity   Int           @default(0)
+  methodology       Int           @default(0)
+  feasibility       Int           @default(0)
+  innovation        Int           @default(0)
+  overall_comments  String?
+  section_comments  String?       // JSON: { description?: string, objectives?: string, methodology?: string, outcomes?: string }
+  created_at        DateTime      @default(now()) @db.Timestamp(6)
+  project_group     project_group @relation(fields: [project_group_id], references: [project_group_id], onDelete: Cascade, onUpdate: NoAction, map: "fk_feedback_group")
+  staff             staff         @relation(fields: [reviewer_id], references: [staff_id], onDelete: NoAction, onUpdate: NoAction, map: "fk_feedback_staff")
+
+  @@unique([project_group_id, reviewer_id])
 }

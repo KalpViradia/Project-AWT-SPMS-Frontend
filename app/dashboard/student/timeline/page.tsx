@@ -4,6 +4,8 @@ import { redirect } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { CalendarDays, FileText, Users, CheckCircle2, Clock, AlertCircle } from "lucide-react"
+import { GanttChart } from "@/components/shared/gantt-chart"
+import { getMilestones } from "@/lib/milestone-actions"
 
 export default async function TimelinePage() {
     const session = await auth()
@@ -49,6 +51,9 @@ export default async function TimelinePage() {
     }
 
     const group = membership.project_group
+
+    // Fetch milestones for the progress chart
+    const milestones = await getMilestones(group.project_group_id)
 
     // Build timeline events
     type TimelineEvent = {
@@ -147,12 +152,30 @@ export default async function TimelinePage() {
     return (
         <div className="flex flex-col gap-6">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Project Timeline</h1>
+                <h1 className="text-3xl font-bold tracking-tight">Timeline & Progress</h1>
                 <p className="text-muted-foreground">
-                    Visual history of your project milestones and activities.
+                    Track project milestones and view activity history.
                 </p>
             </div>
 
+            {/* ── Gantt Progress Chart ── */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>Project Progress</CardTitle>
+                    <CardDescription>
+                        Define milestones and track completion across your project timeline.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <GanttChart
+                        milestones={milestones}
+                        projectGroupId={group.project_group_id}
+                        editable={true}
+                    />
+                </CardContent>
+            </Card>
+
+            {/* ── Event Timeline ── */}
             <Card>
                 <CardHeader>
                     <CardTitle>{group.project_title}</CardTitle>
