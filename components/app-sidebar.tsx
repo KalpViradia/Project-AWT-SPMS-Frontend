@@ -85,6 +85,7 @@ export function AppSidebar({ role = 'student' }: AppSidebarProps) {
                     <div className="flex items-center gap-2">
                         <img src="/logo-dark.png" alt="Studionex" className="h-6 hidden dark:block" />
                         <img src="/logo-light.png" alt="Studionex" className="h-6 block dark:hidden" />
+                        <span className="text-lg font-bold tracking-tight">Studionex</span>
                     </div>
                 )}
             </div>
