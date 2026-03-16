@@ -81,7 +81,6 @@ export function KeyboardShortcutsProvider({ role, children }: KeyboardShortcutsP
             title: "Quick Actions",
             items: [
                 { label: "Go to Profile", keys: "Alt + P" },
-                { label: "Go to Settings", keys: "Alt + S" },
                 { label: "Toggle sidebar", keys: "Alt + B" },
                 { label: "Toggle theme", keys: "Alt + T" },
                 { label: "Log out", keys: "Alt + Q" },
@@ -131,12 +130,6 @@ export function KeyboardShortcutsProvider({ role, children }: KeyboardShortcutsP
                     return
                 }
 
-                // Alt + S — Settings
-                if (key === "s") {
-                    e.preventDefault()
-                    router.push(`/dashboard/${actualRole}/settings`)
-                    return
-                }
 
                 // Alt + B — Toggle sidebar
                 if (key === "b") {
