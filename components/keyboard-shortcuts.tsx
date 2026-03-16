@@ -44,8 +44,7 @@ export function KeyboardShortcutsProvider({ role, children }: KeyboardShortcutsP
                 { href: "/dashboard/faculty/reviews", label: "Reviews" },
                 { href: "/dashboard/faculty/find-students", label: "Find Students" },
                 { href: "/dashboard/faculty/schedule", label: "Schedule" },
-                { href: "/dashboard/faculty/discussion", label: "Announcements" },
-                { href: "/dashboard/faculty/settings", label: "Settings" },
+                { href: "/dashboard/faculty/discussion", label: "Announcements" }
             ]
             : actualRole === "admin"
                 ? [
@@ -56,8 +55,7 @@ export function KeyboardShortcutsProvider({ role, children }: KeyboardShortcutsP
                     { href: "/dashboard/admin/academic-years", label: "Academic Years" },
                     { href: "/dashboard/admin/departments", label: "Departments" },
                     { href: "/dashboard/admin/schedules", label: "All Meetings" },
-                    { href: "/dashboard/admin/reports", label: "Reports" },
-                    { href: "/dashboard/admin/settings", label: "Settings" },
+                    { href: "/dashboard/admin/reports", label: "Reports" }
                 ]
                 : [
                     { href: "/dashboard/student", label: "Overview" },
@@ -68,8 +66,7 @@ export function KeyboardShortcutsProvider({ role, children }: KeyboardShortcutsP
                     { href: "/dashboard/student/reports", label: "Reports" },
                     { href: "/dashboard/student/tasks", label: "Tasks" },
                     { href: "/dashboard/student/timeline", label: "Timeline & Progress" },
-                    { href: "/dashboard/student/discussion", label: "Discussion" },
-                    { href: "/dashboard/student/settings", label: "Settings" },
+                    { href: "/dashboard/student/discussion", label: "Discussion" }
                 ]
 
     const shortcuts: ShortcutGroup[] = [
