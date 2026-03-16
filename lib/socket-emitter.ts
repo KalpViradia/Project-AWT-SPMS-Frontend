@@ -23,20 +23,20 @@ async function relayEmit(room: string, event: string, data: unknown) {
 /**
  * Push a notification event to a specific user's room.
  */
-export function emitNotification(
+export async function emitNotification(
     userId: number,
     userRole: string,
     data: { title: string; message: string; link?: string }
 ) {
-    relayEmit(`user:${userRole}:${userId}`, "notification:new", data)
+    await relayEmit(`user:${userRole}:${userId}`, "notification:new", data)
 }
 
 /**
  * Broadcast a discussion message to a group room.
  */
-export function emitDiscussionMessage(
+export async function emitDiscussionMessage(
     groupId: number,
     message: Record<string, unknown>
 ) {
-    relayEmit(`group:${groupId}`, "discussion:message", message)
+    await relayEmit(`group:${groupId}`, "discussion:message", message)
 }

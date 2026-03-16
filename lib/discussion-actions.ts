@@ -41,70 +41,75 @@ export async function sendDiscussionMessage(formData: FormData) {
     if (!content?.trim() && !attachmentUrl) throw new Error("Message cannot be empty.")
     if (!groupIdStr) throw new Error("Project group ID required.")
 
-    const projectGroupId = parseInt(groupIdStr)
-    const senderId = parseInt(user.id)
-    const senderRole = user.role || 'student'
+    try {
+        const projectGroupId = parseInt(groupIdStr)
+        const senderId = parseInt(user.id)
+        const senderRole = user.role || 'student'
 
-    // Permission checks
-    if (channel === 'announcement' && senderRole !== 'faculty') {
-        // Students can reply to announcements, but the reply_to_id must be set
-        if (!replyToIdStr) {
-            throw new Error("Only faculty can post announcements. Students can only reply.")
+        // Permission checks
+        if (channel === 'announcement' && senderRole !== 'faculty') {
+            // Students can reply to announcements, but the reply_to_id must be set
+            if (!replyToIdStr) {
+                throw new Error("Only faculty can post announcements. Students can only reply.")
+            }
         }
-    }
-    if (channel === 'discussion' && senderRole !== 'student') {
-        throw new Error("Only students can post in the discussion channel.")
-    }
-
-    // Get sender name
-    let senderName = user.name || null
-    if (!senderName) {
-        if (senderRole === 'student') {
-            const s = await prisma.student.findUnique({ where: { student_id: senderId }, select: { student_name: true } })
-            senderName = s?.student_name || `Student #${senderId}`
-        } else {
-            const s = await prisma.staff.findUnique({ where: { staff_id: senderId }, select: { staff_name: true } })
-            senderName = s?.staff_name || `Faculty #${senderId}`
+        if (channel === 'discussion' && senderRole !== 'student') {
+            throw new Error("Only students can post in the discussion channel.")
         }
-    }
 
-    const replyToId = replyToIdStr ? parseInt(replyToIdStr) : null
+        // Get sender name
+        let senderName = user.name || null
+        if (!senderName) {
+            if (senderRole === 'student') {
+                const s = await prisma.student.findUnique({ where: { student_id: senderId }, select: { student_name: true } })
+                senderName = s?.student_name || `Student #${senderId}`
+            } else {
+                const s = await prisma.staff.findUnique({ where: { staff_id: senderId }, select: { staff_name: true } })
+                senderName = s?.staff_name || `Faculty #${senderId}`
+            }
+        }
 
-    const created = await prisma.discussion_message.create({
-        data: {
-            project_group_id: projectGroupId,
-            sender_id: senderId,
-            sender_role: senderRole,
-            sender_name: senderName,
-            content: (content || '').trim(),
-            channel,
-            reply_to_id: replyToId,
-            attachment_url: attachmentUrl || null,
-            attachment_type: attachmentType || null,
-        },
-        include: {
-            reply_to: {
-                select: {
-                    message_id: true,
-                    sender_name: true,
-                    content: true,
-                    sender_role: true,
-                }
+        const replyToId = replyToIdStr ? parseInt(replyToIdStr) : null
+
+        const created = await prisma.discussion_message.create({
+            data: {
+                project_group_id: projectGroupId,
+                sender_id: senderId,
+                sender_role: senderRole,
+                sender_name: senderName,
+                content: (content || '').trim(),
+                channel,
+                reply_to_id: replyToId,
+                attachment_url: attachmentUrl || null,
+                attachment_type: attachmentType || null,
             },
-            reactions: true,
-        }
-    })
+            include: {
+                reply_to: {
+                    select: {
+                        message_id: true,
+                        sender_name: true,
+                        content: true,
+                        sender_role: true,
+                    }
+                },
+                reactions: true,
+            }
+        })
 
-    // Broadcast via WebSocket
-    emitDiscussionMessage(projectGroupId, {
-        ...created,
-        _channel: channel,
-    })
+        // Broadcast via WebSocket
+        await emitDiscussionMessage(projectGroupId, {
+            ...created,
+            _channel: channel,
+        })
 
-    revalidatePath('/dashboard/student/discussion')
-    revalidatePath('/dashboard/faculty/discussion')
+        revalidatePath('/dashboard/student/discussion')
+        revalidatePath('/dashboard/faculty/discussion')
 
-    return created
+        return created
+    } catch (error) {
+        console.error("[sendDiscussionMessage] Error:", error)
+        throw error // Re-throw so Next.js shows the error message or returns 500
+    }
 }
 
 // ─── Toggle reaction ───

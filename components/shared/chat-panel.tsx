@@ -78,14 +78,18 @@ export function ChatPanel({
     const [attachment, setAttachment] = useState<{ url: string; type: string; name: string } | null>(null)
     const scrollRef = useRef<HTMLDivElement>(null)
     const fileInputRef = useRef<HTMLInputElement>(null)
-    const socket = useSocket()
+    const { socket, isWaking } = useSocket()
     const prevGroupRef = useRef<number | null>(null)
     const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
     // Fetch messages
     const fetchMessages = useCallback(async () => {
-        const msgs = await getDiscussionMessages(projectGroupId, channel)
-        setMessages(msgs as Message[])
+        try {
+            const msgs = await getDiscussionMessages(projectGroupId, channel)
+            setMessages(msgs as Message[])
+        } catch (err) {
+            console.error("Failed to fetch messages:", err)
+        }
     }, [projectGroupId, channel])
 
     // Socket join/leave
@@ -262,7 +266,17 @@ export function ChatPanel({
     const canUserSend = canSend || (canReply && replyTo !== null)
 
     return (
-        <div className="flex flex-col h-[550px] border rounded-lg overflow-hidden bg-card">
+        <div className="flex flex-col h-[550px] border rounded-lg overflow-hidden bg-card transition-all duration-300">
+            {/* Wake-up Banner */}
+            {isWaking && (
+                <div className="bg-primary/10 border-b px-4 py-2 flex items-center justify-center gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                    <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                    <p className="text-[11px] font-medium text-primary tracking-wide">
+                        Server is waking up... please wait a few seconds.
+                    </p>
+                </div>
+            )}
+
             {/* Header */}
             <div className="flex items-center gap-2 border-b px-4 py-2.5 bg-muted/30">
                 <MessageSquare className="h-4 w-4 text-primary" />

@@ -36,7 +36,7 @@ export function NotificationBell() {
     const [hasMounted, setHasMounted] = useState(false)
     const [isPending, startTransition] = useTransition()
     const router = useRouter()
-    const socket = useSocket()
+    const { socket } = useSocket()
 
     const fetchData = async () => {
         const [notifs, count] = await Promise.all([

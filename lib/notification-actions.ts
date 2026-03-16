@@ -30,7 +30,7 @@ export async function createNotification({
     })
 
     // Push real-time event via WebSocket
-    emitNotification(userId, userRole, { title, message, link })
+    await emitNotification(userId, userRole, { title, message, link })
 }
 
 // ─── Get notifications for current user ───
